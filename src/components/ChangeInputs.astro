@@ -1,0 +1,33 @@
+---
+const { numUsers, numMessages } = Astro.props;
+---
+
+<script is:inline type="module">
+  const input = document.querySelector('input');
+  input.addEventListener('input', updateValue);
+
+  function updateValue(e) {    
+    
+    if (e.target.name === 'users') { 
+      const log = document.getElementById('users');
+      numUsers = e.target.value;
+      log.textContent = e.target.value;
+    }
+
+    if (e.target.name === 'messages') {
+      const log = document.getElementById('messages');
+      numMessages = e.target.value;      
+      log.textContent = e.target.value;
+    }
+  }
+</script>
+<div class="grid gap-6 mb-6 md:grid-cols-2">
+  <div>
+      <label for="users" class="block mb-2 text-sm font-medium">Number of Users</label>
+      <input type="number" id="users" name="users" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="5" required>
+  </div>
+  <div>
+      <label for="messages" class="block mb-2 text-sm font-medium">Number of Messages</label>
+      <input type="number" id="messages" name="messages" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="10" required>
+  </div>
+</div>

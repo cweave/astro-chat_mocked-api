@@ -1,0 +1,50 @@
+---
+// Component Imports
+import Users from '../components/Users.astro';
+import Messages from '../components/Messages.astro';
+import ChangeInputs from '../components/ChangeInputs.astro';
+
+  const numUsers = 5;
+  const numMessages = 7;
+  const getChat = async () => {
+    try {    
+      const url = `https://api.mocked-api.dev/chat/random/various/${numUsers}/${numMessages}`;
+      const response = await fetch(url, {
+          "method": "GET",
+          "headers": {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+      });
+      console.log(response.status)
+      if (response.status === 200) {
+        const result = await response.json();
+        return result;
+      }
+    } catch (error) {
+      console.error(error.message)
+    }
+  }
+
+  const { users, messages } = await getChat();
+---
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Astro + TailwindCSS</title>
+    <link rel="stylesheet" type="text/css" href="/global.css">
+  </head>
+
+  <body>
+    <div class="w-full"></div>   
+      <div class="container mx-auto">
+        <ChangeInputs numUsers={numUsers} numMessages={numMessages} />
+        <div class="py-6 h-screen">
+          <div class="flex border border-grey rounded shadow-lg h-full">
+            <Users users={users} />
+            <Messages users={users} messages={messages} />
+          </div>
+        </div>
+    </div>
+  </body>
+</html>
