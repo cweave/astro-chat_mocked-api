@@ -8,9 +8,7 @@ const { users, messages } = Astro.props;
 const removeRandom = (array) => {
   while (array.length) {
     const generateMessages =  Math.floor(Math.random() * messages.length) - 1;
-    console.log(generateMessages)
     const el = array.splice(generateMessages, 1);
-    console.log(el)
     return el;
   }
 };
