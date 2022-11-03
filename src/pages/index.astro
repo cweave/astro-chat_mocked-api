@@ -1,50 +1,201 @@
 ---
-// Component Imports
-import Users from '../components/Users.astro';
-import Messages from '../components/Messages.astro';
-import ChangeInputs from '../components/ChangeInputs.astro';
+const userValues = {
+  users: 5,
+  messages: 7
+};
 
-  const numUsers = 5;
-  const numMessages = 7;
-  const getChat = async () => {
-    try {    
-      const url = `https://api.mocked-api.dev/chat/random/various/${numUsers}/${numMessages}`;
-      const response = await fetch(url, {
-          "method": "GET",
-          "headers": {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-      });
-      console.log(response.status)
-      if (response.status === 200) {
-        const result = await response.json();
-        return result;
+console.log('update?');
+const getChat = async () => {
+  try {
+    const url = `https://api.mocked-api.dev/chat/random/various/${userValues.users}/${userValues.messages}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
       }
-    } catch (error) {
-      console.error(error.message)
+    });
+    
+    if (response.status !== 200) {
+      throw Error('Server bomb');
     }
+
+    if (response.status === 200) {
+      const result = await response.json();
+      return result;
+    }
+  } catch (error) {
+    console.error(error.message);
   }
+};
 
-  const { users, messages } = await getChat();
+const { users, messages } = await getChat();
+
+const timeElapsed = Date.now();
+const today = new Date(timeElapsed);
+
+// generate "my" messages
+const removeRandom = (array) => {
+  while (array.length) {
+    const generateMessages = Math.floor(Math.random() * messages.length) - 1;
+    const el = array.splice(generateMessages, 1);
+    return el;
+  }
+};
+
+const myMessages = removeRandom(messages);
 ---
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Astro + TailwindCSS</title>
-    <link rel="stylesheet" type="text/css" href="/global.css">
-  </head>
 
-  <body>
-    <div class="w-full"></div>   
-      <div class="container mx-auto">
-        <ChangeInputs numUsers={numUsers} numMessages={numMessages} />
-        <div class="py-6 h-screen">
-          <div class="flex border border-grey rounded shadow-lg h-full">
-            <Users users={users} />
-            <Messages users={users} messages={messages} />
+<script is:inline type='module' define:vars={{ userValues }}>
+  // window.getChat = getChat;
+  const updateButton = document.getElementById('update');
+  const inputs = document.getElementById('update-user-messages').elements;
+  const updateValue = async () => {
+    console.log('inputs', getChat);
+    for (let i = 0; i < inputs.length; i++) {
+      console.log('inputs[i].nodeName', inputs[i]);
+      if (inputs[i].nodeName === 'INPUT') {
+        console.log('inputs[i].value', inputs[i].value);
+        userValues[inputs[i].name] = inputs[i].value;
+      }
+    }
+    console.log('userValues', userValues);
+    // await getChat();
+  };
+
+  updateButton.addEventListener('click', updateValue);
+</script>
+
+<!doctype html>
+<html>
+<title>Astro + TailwindCSS</title>
+
+
+<body>
+  <div class='container mx-auto'>
+    <div class='grid gap-6 mb-6 md:grid-cols-2'>
+      <!-- Change number of stuff -->
+      <form
+        class='form-container'
+        id='update-user-messages'
+        onsubmit='return false;'
+      >
+        <div>
+          <label for='users' class='block mb-2 text-sm font-medium'
+            >Number of Users</label
+          >
+          <input
+            type='number'
+            id='users'
+            name='users'
+            class='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500'
+            placeholder='5'
+            required
+          />
+        </div>
+        <div>
+          <label for='messages' class='block mb-2 text-sm font-medium'
+            >Number of Messages</label
+          >
+          <input
+            type='number'
+            id='messages'
+            name='messages'
+            class='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500'
+            placeholder='10'
+            required
+          />
+        </div>
+        <button
+          id='update'
+          type='submit'
+          class='text-lg font-medium leading-6 text-gray-900'>Update</button
+        >
+      </form>
+    </div>
+    <div class='py-6 h-screen'>
+      <div class='flex border border-grey rounded shadow-lg h-full'>
+        <!-- Users -->
+        <div class='bg-grey-lighter flex-1 overflow-auto'>
+          {
+            users.map((item) => (
+              <div class='px-3 flex items-center bg-grey-light cursor-pointer'>
+                <div>
+                  <img
+                    class='h-12 w-12 rounded-full'
+                    src={item.avatarUrl}
+                    alt={item.username}
+                  />
+                </div>
+                <div class='ml-4 flex-1 border-b border-grey-lighter py-4'>
+                  <div class='items-bottom'>
+                    <p class='text-grey-darkest'>{item.username}</p>
+                    <p class='text-xs text-grey-darkest'>{item.email}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <!-- Messages -->
+        <div
+          class='flex-1 overflow-auto'
+          style='background-color: rgb(55, 65, 81)'
+        >
+          <div class='py-2 px-3'>
+            <div class='flex justify-center mb-2'>
+              <div class='rounded py-2 px-4' style='background-color: #6b21a8'>
+                <p class='text-sm uppercase' style='color: #FFF'>
+                  {today.toDateString()}
+                </p>
+              </div>
+            </div>
+
+            {
+              messages.map((item: any) => (
+                <div class='flex mb-2'>
+                  <div
+                    class='rounded py-2 px-3'
+                    style='background-color: #F2F2F2'
+                  >
+                    {users
+                      .filter((user: any) => user.userId === item.userId)
+                      .map((filteredUser: any) => (
+                        <p class='text-sm text-teal'>{filteredUser.username}</p>
+                      ))}
+                    <p class='text-sm mt-1'>{item.message}</p>
+                    <p class='text-right text-xs text-grey-dark mt-1'>
+                      {new Date(item.createdAt).toLocaleTimeString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            }
+
+            {
+              myMessages.map((item: any) => (
+                <div class='flex justify-end mb-2'>
+                  <div
+                    class='rounded py-2 px-3'
+                    style='background-color: #E2F7CB'
+                  >
+                    {users
+                      .filter((user: any) => user.userId === item.userId)
+                      .map((filteredUser: any) => (
+                        <p class='text-sm text-teal'>{filteredUser.username}</p>
+                      ))}
+                    <p class='text-sm mt-1'>{item.message}</p>
+                    <p class='text-right text-xs text-grey-dark mt-1'>
+                      {new Date(item.createdAt).toLocaleTimeString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            }
           </div>
         </div>
+      </div>
     </div>
-  </body>
+  </div>
+</body>
 </html>
